@@ -69,26 +69,104 @@ const getUser = async (req, res) => {
   }
 };
 
-const updateUserName = async (req, res) => {
-  const { userId, newName } = req.body;
-  try {
-    let user = await UserModel.findById(userId);
 
+// const updateUserName = async (req, res) => {
+//   try {
+//     const { userId, name, email, location, mobile } = req.body;
+
+//     // Basic validation
+//     if (!userId) {
+//       return res.status(400).send({ message: "User ID is required." });
+//     }
+
+//     // Check if user exists
+//     const user = await UserModel.findById(userId);
+//     if (!user) {
+//       return res.status(404).send({ message: "User not found!" });
+//     }
+
+//     // Update only the fields that are provided
+//     if (name !== undefined) user.name = name;
+//     if (email !== undefined) user.email = email;
+//     if (location !== undefined) user.location = location;
+//     if (mobile !== undefined) user.mobile = mobile;
+
+//     // Save the updated user
+//     const updatedUser = await user.save();
+
+//     return res.status(200).send({
+//       message: "User details updated successfully!",
+//       data: updatedUser,
+//     });
+
+//   } catch (error) {
+//     console.error("Update Error:", error);
+//     return res.status(500).send({
+//       message: "Error updating user details",
+//       error: error.message,
+//     });
+//   }
+// };
+
+const updateUserName = async (req, res) => {
+  console.log('body=======>', req.params)
+  try {
+    const { id } = req.params; // 👈 Get userId from URL
+    const { name, email, location, mobile, profileImage } = req.body;
+
+    if (!id) {
+      return res.status(400).send({ message: "User ID is required in URL." });
+    }
+
+    const user = await UserModel.findById(id);
     if (!user) {
       return res.status(404).send({ message: "User not found!" });
     }
-    user.name = newName;
 
-    user = await user.save();
+    if (name !== undefined) user.name = name;
+    if (email !== undefined) user.email = email;
+    if (location !== undefined) user.location = location;
+    if (mobile !== undefined) user.mobile = mobile;
+    if (profileImage !== undefined) user.profileImage = profileImage;
 
-    res
-      .status(200)
-      .send({ message: "User name updated successfully!", data: user });
+    const updatedUser = await user.save();
+
+    return res.status(200).send({
+      message: "User details updated successfully!",
+      data: updatedUser,
+    });
+
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Error updating user name", error: error });
+    console.error("Update Error:", error);
+    return res.status(500).send({
+      message: "Error updating user details",
+      error: error.message,
+    });
   }
 };
+
+
+
+// const updateUserName = async (req, res) => {
+//   const { userId, newName } = req.body;
+//   try {
+//     let user = await UserModel.findById(userId);
+
+//     if (!user) {
+//       return res.status(404).send({ message: "User not found!" });
+//     }
+//     user.name = newName;
+
+//     user = await user.save();
+
+//     res
+//       .status(200)
+//       .send({ message: "User name updated successfully!", data: user });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ message: "Error updating user name", error: error });
+//   }
+// };
 
 // const deleteUserById = async (req, res) => {
 //   const { userId } = req.params;
@@ -142,6 +220,7 @@ const login = async (req, res) => {
     const user = await UserModel.findOne({
       $and: [{ email: email }, { isVerified: true }, { isDelete: false }],
     });
+    // console.log(user);
 
     if (!user) {
       return res.status(404).send({ message: "User not found!" });
@@ -159,7 +238,7 @@ const login = async (req, res) => {
           token: token,
           email: user.email, // Include user email if needed
           auth: user.auth, // Send the auth (role) field to the frontend
-          _id : user._id,
+          _id: user._id,
         },
       });
     } else {
@@ -270,18 +349,18 @@ const addIntersts = async (req, res) => {
 
 
 const getUserById = async (req, res) => {
-    const eventId = req.params.id;
-  
-    try {
-      const event = await UserModel.findById(eventId);
-      if (!event) {
-        return res.status(404).json({ message: "Event not found" });
-      }
-      res.status(200).json({ message: "Success!", data: event });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch event", error: error.message });
+  const eventId = req.params.id;
+
+  try {
+    const event = await UserModel.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
     }
-  };
+    res.status(200).json({ message: "Success!", data: event });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch event", error: error.message });
+  }
+};
 
 module.exports = {
   addUser,

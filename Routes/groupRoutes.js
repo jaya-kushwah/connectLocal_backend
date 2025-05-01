@@ -1,18 +1,20 @@
-const express = require ('express')
+const express = require('express')
 
 const {
-   addGroup,
-   confirmUserInGroup,
-   getAllGroups
+  addGroup,
+  confirmUserInGroup,
+  getAllGroups
 
- }=require('../Controller/groupController');
+} = require('../Controller/groupController');
+
 
 const router = express.Router();
 
 router.route("/").post(addGroup);
+// router.post('/creategroup', verifyToken, addGroup);
 router.put("/confirm-user", confirmUserInGroup);
 router.get("/", getAllGroups);
 
 
 
-module.exports=router;
+module.exports = router;

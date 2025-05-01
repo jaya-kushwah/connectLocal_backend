@@ -17,6 +17,85 @@ const addGroup = async (req, res) => {
   }
 };
 
+// const addGroup = async (req, res) => {
+//   const { name, description, status, groupMember } = req.body;
+
+//   try {
+//     // Ensure the user is authenticated via middleware
+//     if (!req.userData || !req.userData.userid) {
+//       return res.status(401).json({ message: 'User is not authenticated' });
+//     }
+
+//     // Validate required fields
+//     if (!name || !description) {
+//       return res.status(400).json({ message: 'Name and description are required' });
+//     }
+
+//     // Validate group members
+//     if (!groupMember || groupMember.length === 0) {
+//       return res.status(400).json({ message: 'At least one group member is required' });
+//     }
+
+//     // Validate member emails
+//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+//     const invalidEmails = groupMember.filter(member => !emailRegex.test(member.email));
+
+//     if (invalidEmails.length > 0) {
+//       return res.status(400).json({
+//         message: 'Invalid email addresses',
+//         invalidEmails: invalidEmails.map(m => m.email)
+//       });
+//     }
+
+//     // Check for duplicate members
+//     const memberEmails = groupMember.map(m => m.email);
+//     if (new Set(memberEmails).size !== memberEmails.length) {
+//       return res.status(400).json({ message: 'Duplicate member emails found' });
+//     }
+
+//     // Create the new group
+//     const newGroup = new Group({
+//       admin: req.userData.userid,
+//       name,
+//       description,
+//       status: status || 'active',
+//       groupMember: groupMember.map(member => ({
+//         email: member.email,
+//         role: 'member',
+//         status: 'pending'
+//       }))
+//     });
+
+//     // Save to database
+//     await newGroup.save();
+
+//     // Populate admin details in the response
+//     const populatedGroup = await Group.findById(newGroup._id)
+//       .populate('admin', 'name email avatar')
+//       .exec();
+
+//     res.status(201).json({
+//       message: 'Group created successfully!',
+//       data: populatedGroup,
+//       memberInvites: groupMember.length
+//     });
+
+//   } catch (error) {
+//     console.error('Error creating group:', error);
+
+//     if (error.name === 'ValidationError') {
+//       const messages = Object.values(error.errors).map(val => val.message);
+//       return res.status(400).json({ message: 'Validation failed', errors: messages });
+//     }
+
+//     if (error.code === 11000) {
+//       return res.status(400).json({ message: 'Group name already exists' });
+//     }
+
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// };
+
 
 const getAllGroups = async (req, res) => {
     try {

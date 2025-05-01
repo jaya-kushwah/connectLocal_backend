@@ -11,10 +11,10 @@ const eventSchema = new mongoose.Schema({
     hostedBy: { type: String, required: true },
     hostedProfileLink: { type: String, required: true },
     location: { type: String, required: true },
-    eventImage: { type: String, required: true },
+    eventImage: { type: String },
     category: { type: String, required: true },
     tags: { type: [String], default: [] },
-    ticketPrice: { type: Number, default: 0 },
+    ticketPrice: { type: Number, default: 0 },  
     capacity: { type: Number, default: 0 }
 }, { timestamps: true });
 

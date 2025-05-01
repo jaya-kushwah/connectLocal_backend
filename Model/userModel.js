@@ -14,11 +14,14 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,        
+      required: true,
     },
     mobile: {
       type: String,
       required: true,
+    },
+    profileImage: {
+      type: String,
     },
     location: {
       type: String,
@@ -29,13 +32,13 @@ const userSchema = new mongoose.Schema(
       enum: [true, false],
       default: false,
     },
-    interests: [{ type: String,required:true }],
+    interests: [{ type: String, required: true }],
     otp: {
       type: Number,
     },
-    auth:{
-      type:String,
-      default:"user"
+    auth: {
+      type: String,
+      default: "user"
     },
     isVerified: {
       type: Boolean,
@@ -60,16 +63,16 @@ userSchema.pre("save", function (next) {
 userSchema.static("matchPassword", async function (email, password) {
   console.log("in");
   let user = await this.findOne({ email: email });
-
   if (!user) {
     console.log("email");
-
     throw new Error("user not found");
   }
   const salt = "password";
   const hashPassword = createHmac("sha256", salt)
     .update(password)
     .digest("hex");
+  console.log(hashPassword, user.password);
+
   if (user.password !== hashPassword) {
     console.log("pass");
     throw new Error("wrong password");

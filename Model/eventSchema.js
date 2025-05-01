@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-    eventName: {
+    eventTitle: {
         type: String,
         required: true,
     },
@@ -25,7 +25,7 @@ const eventSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    slotPrice: {
+    ticketPrice: {
         type: Number,
         required: true,
     },
@@ -33,16 +33,16 @@ const eventSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    status:{
-            type:String,
-            default:"pending",
+    status: {
+        type: String,
+        default: "pending",
     },
-    eventType:{
-        type:String,
-        enum:['All','Today','Tomorrow','ThisWeekend','Free'],
-        default:'All',
+    eventType: {
+        type: String,
+        enum: ['All', 'Today', 'Tomorrow', 'ThisWeekend', 'Free'],
+        default: 'All',
     },
-    eventPic: {
+    eventImage: {
         type: String,
         default: null,
     },

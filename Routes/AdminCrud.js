@@ -1,6 +1,6 @@
 const express = require("express");
 const { getAllUsers, getUsersByStatus, getUserById, updateUser, toggleBlockUser, deleteUser } = require("../Controller/AdminUserCrud");
-const adminMiddleware = require("../Middleware/AdminMiddleware");
+// const adminMiddleware = require("../Middleware/AdminMiddleware");
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const User = require("../Model/AdminCrud");
-const adminMiddleware = require("../Middleware/AdminMiddleware");
+// const adminMiddleware = require("../Middleware/AdminMiddleware");
 
 const getAllUsers = async (req, res) => {
     try {

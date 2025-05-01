@@ -4,6 +4,11 @@ const PORT = 8080;
 const cors = require('cors');
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// your routes here...
+
 app.use(express.json());  // ✅ Add this
 app.use(cors());
 var path = require('path');
