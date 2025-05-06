@@ -1,6 +1,5 @@
 const express = require("express");
 const User = require("../Model/AdminCrud");
-// const adminMiddleware = require("../Middleware/AdminMiddleware");
 
 const getAllUsers = async (req, res) => {
     try {
@@ -65,16 +64,63 @@ const deleteUser = async (req, res) => {
     }
 };
 
+// const getDashboardStats = async (req, res) => {
+//     try {
+//         const totalUsers = await User.countDocuments({ isDeleted: false });
+//         const activeUsers = await User.countDocuments({ status: "active", isDeleted: false });
+//         const blockedUsers = await User.countDocuments({ status: "blocked", isDeleted: false });
+
+//         res.status(200).json({
+//             totalUsers,
+//             activeUsers,
+//             blockedUsers
+//         });
+//     } catch (error) {
+//         res.status(500).json({ message: "Server Error", error });
+//     }
+// };
+
+
+const getDashboardStats = async (req, res) => {
+    try {
+        const totalUsers = await User.countDocuments({ isDeleted: false });
+        const activeUsers = await User.countDocuments({ status: "active", isDeleted: false });
+        const blockedUsers = await User.countDocuments({ status: "blocked", isDeleted: false });
+
+        // Mock event data for now (replace with real aggregation later)
+        const eventsPerMonth = [
+            { month: "Jan", events: 4 },
+            { month: "Feb", events: 7 },
+            { month: "Mar", events: 5 },
+            { month: "Apr", events: 6 },
+            { month: "May", events: 3 },
+            { month: "Jun", events: 2 }
+        ];
+
+        res.status(200).json({
+            totalUsers,
+            activeUsers,
+            blockedUsers,
+            eventsPerMonth // ✅ Add this to the response
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error", error });
+    }
+};
+
+
+  
+
 module.exports = {
     getAllUsers: [  getAllUsers],
     getUsersByStatus: [  getUsersByStatus],
     getUserById: [  getUserById],
     updateUser: [  updateUser],
     toggleBlockUser: [  toggleBlockUser],
-    deleteUser: [  deleteUser]
+    deleteUser: [  deleteUser],
+    getDashboardStats: [  getDashboardStats]
 };
 
 
 
-// postman api
 

@@ -1,13 +1,11 @@
-const Group = require("../Model/groupModel"); // Use uppercase 'G' for models by convention
+const Group = require("../Model/groupModel"); 
+const UserModel = require("../Model/userModel");
 
 const addGroup = async (req, res) => {
   const { userId, name, description, status, groupMember } = req.body;
 
   try {
-    // Create a new group instance
     let newGroup = new Group({ userId, name, description, status, groupMember });
-
-    // Save to database
     newGroup = await newGroup.save();
 
     res.status(201).json({ message: "Success!", data: newGroup });
@@ -16,86 +14,6 @@ const addGroup = async (req, res) => {
     res.status(400).json({ message: "Failed!", error: error.message });
   }
 };
-
-// const addGroup = async (req, res) => {
-//   const { name, description, status, groupMember } = req.body;
-
-//   try {
-//     // Ensure the user is authenticated via middleware
-//     if (!req.userData || !req.userData.userid) {
-//       return res.status(401).json({ message: 'User is not authenticated' });
-//     }
-
-//     // Validate required fields
-//     if (!name || !description) {
-//       return res.status(400).json({ message: 'Name and description are required' });
-//     }
-
-//     // Validate group members
-//     if (!groupMember || groupMember.length === 0) {
-//       return res.status(400).json({ message: 'At least one group member is required' });
-//     }
-
-//     // Validate member emails
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     const invalidEmails = groupMember.filter(member => !emailRegex.test(member.email));
-
-//     if (invalidEmails.length > 0) {
-//       return res.status(400).json({
-//         message: 'Invalid email addresses',
-//         invalidEmails: invalidEmails.map(m => m.email)
-//       });
-//     }
-
-//     // Check for duplicate members
-//     const memberEmails = groupMember.map(m => m.email);
-//     if (new Set(memberEmails).size !== memberEmails.length) {
-//       return res.status(400).json({ message: 'Duplicate member emails found' });
-//     }
-
-//     // Create the new group
-//     const newGroup = new Group({
-//       admin: req.userData.userid,
-//       name,
-//       description,
-//       status: status || 'active',
-//       groupMember: groupMember.map(member => ({
-//         email: member.email,
-//         role: 'member',
-//         status: 'pending'
-//       }))
-//     });
-
-//     // Save to database
-//     await newGroup.save();
-
-//     // Populate admin details in the response
-//     const populatedGroup = await Group.findById(newGroup._id)
-//       .populate('admin', 'name email avatar')
-//       .exec();
-
-//     res.status(201).json({
-//       message: 'Group created successfully!',
-//       data: populatedGroup,
-//       memberInvites: groupMember.length
-//     });
-
-//   } catch (error) {
-//     console.error('Error creating group:', error);
-
-//     if (error.name === 'ValidationError') {
-//       const messages = Object.values(error.errors).map(val => val.message);
-//       return res.status(400).json({ message: 'Validation failed', errors: messages });
-//     }
-
-//     if (error.code === 11000) {
-//       return res.status(400).json({ message: 'Group name already exists' });
-//     }
-
-//     res.status(500).json({ message: 'Server error', error: error.message });
-//   }
-// };
-
 
 const getAllGroups = async (req, res) => {
     try {
@@ -106,9 +24,6 @@ const getAllGroups = async (req, res) => {
         res.status(400).send({ message: "Failed!", data: "", error: error.message });
     }
 };
-
-
-
 
 
 const confirmUserInGroup = async (req, res) => {
@@ -135,6 +50,53 @@ const confirmUserInGroup = async (req, res) => {
   };
   
 
+
+  const validateGroupMembers = async (req, res) => {
+    const { emails } = req.body;
+  
+    if (!emails || !Array.isArray(emails)) {
+      return res.status(400).json({ message: "Invalid request. 'emails' must be an array." });
+    }
+  
+    try {
+      const existingUsers = await UserModel.find({ email: { $in: emails } }, { email: 1, _id: 1, name: 1 });
+  
+      const existingEmails = existingUsers.map(user => user.email);
+      const nonExistingEmails = emails.filter(email => !existingEmails.includes(email));
+  
+      res.status(200).json({
+        message: "Validation result",
+        existingUsers,
+        nonExistingEmails 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  };
+
+
+
+  const getMyGroups = async (req, res) => {
+    try {
+      const userId = req.cookies.userId;
+  
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'User not logged in' });
+      }
+  
+      const groups = await Group.find({ userId });
+  
+      res.status(200).json({
+        success: true,
+        count: groups.length,
+        data: groups
+      });
+    } catch (error) {
+      console.error("Error fetching user groups:", error);
+      res.status(500).json({ success: false, message: 'Server Error' });
+    }
+  };
+  
   
 
-module.exports = { addGroup,confirmUserInGroup,getAllGroups };
+module.exports = { addGroup,confirmUserInGroup,getAllGroups,validateGroupMembers ,getMyGroups};

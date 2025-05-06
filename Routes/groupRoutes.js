@@ -3,17 +3,19 @@ const express = require('express')
 const {
   addGroup,
   confirmUserInGroup,
-  getAllGroups
-
+  getAllGroups,
+  validateGroupMembers,
+  getMyGroups
 } = require('../Controller/groupController');
 
 
 const router = express.Router();
 
 router.route("/").post(addGroup);
-// router.post('/creategroup', verifyToken, addGroup);
 router.put("/confirm-user", confirmUserInGroup);
 router.get("/", getAllGroups);
+router.post('/validate-emails', validateGroupMembers);
+router.get('/mygroups', getMyGroups);
 
 
 

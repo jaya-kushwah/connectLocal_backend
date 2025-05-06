@@ -21,6 +21,11 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    status: {
+        type: String,
+        // enum: ['pending', 'confirm'],
+        default: 'pending'
+    }
 }, {
     timestamps: true
 });

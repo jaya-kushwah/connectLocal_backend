@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { createHmac } = require("crypto");
 const jwt = require("jsonwebtoken");
 const S_key = "vaish";
+const salt = "password"
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -50,41 +51,37 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+
 userSchema.pre("save", function (next) {
-  let data = this;
-  const salt = "password";
-  const hashPassword = createHmac("sha256", salt)
-    .update(data.password)
-    .digest("hex");
-  data.password = hashPassword;
+  if (this.isModified("password")) {
+    const hashPassword = createHmac("sha256", salt)
+      .update(this.password)
+      .digest("hex");
+    this.password = hashPassword;
+  }
   next();
 });
 
-userSchema.static("matchPassword", async function (email, password) {
-  console.log("in");
-  let user = await this.findOne({ email: email });
+// ✅ Static method for login (password match + token)
+userSchema.static("matchPassword", async function (email, plainPassword) {
+  const user = await this.findOne({ email });
+
   if (!user) {
-    console.log("email");
-    throw new Error("user not found");
+    throw new Error("User not found");
   }
-  const salt = "password";
-  const hashPassword = createHmac("sha256", salt)
-    .update(password)
+
+  const hashedInput = createHmac("sha256", salt)
+    .update(plainPassword)
     .digest("hex");
-  console.log(hashPassword, user.password);
 
-  if (user.password !== hashPassword) {
-    console.log("pass");
-    throw new Error("wrong password");
-  } else {
-    console.log("work");
-
-    const token = jwt.sign({ userid: user._id, name: user.name }, S_key, {
-      expiresIn: "1h",
-    });
-    return token;
+  if (user.password !== hashedInput) {
+    throw new Error("Incorrect password");
   }
+
+  const token = jwt.sign({ userid: user._id }, S_key, { expiresIn: "1h" });
+  return token;
 });
+
 
 const userModel = mongoose.model("users", userSchema);
 

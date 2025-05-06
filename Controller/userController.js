@@ -5,7 +5,6 @@ const { otp, sentOtp } = require("../utils/helper");
 
 const addUser = async (req, res) => {
   let { name, email, password, mobile, location, interests } = req.body;
-  // interests = interests.split(",");
 
   try {
     let user = await UserModel.find({
@@ -70,44 +69,6 @@ const getUser = async (req, res) => {
 };
 
 
-// const updateUserName = async (req, res) => {
-//   try {
-//     const { userId, name, email, location, mobile } = req.body;
-
-//     // Basic validation
-//     if (!userId) {
-//       return res.status(400).send({ message: "User ID is required." });
-//     }
-
-//     // Check if user exists
-//     const user = await UserModel.findById(userId);
-//     if (!user) {
-//       return res.status(404).send({ message: "User not found!" });
-//     }
-
-//     // Update only the fields that are provided
-//     if (name !== undefined) user.name = name;
-//     if (email !== undefined) user.email = email;
-//     if (location !== undefined) user.location = location;
-//     if (mobile !== undefined) user.mobile = mobile;
-
-//     // Save the updated user
-//     const updatedUser = await user.save();
-
-//     return res.status(200).send({
-//       message: "User details updated successfully!",
-//       data: updatedUser,
-//     });
-
-//   } catch (error) {
-//     console.error("Update Error:", error);
-//     return res.status(500).send({
-//       message: "Error updating user details",
-//       error: error.message,
-//     });
-//   }
-// };
-
 const updateUserName = async (req, res) => {
   console.log('body=======>', req.params)
   try {
@@ -145,99 +106,29 @@ const updateUserName = async (req, res) => {
   }
 };
 
-
-
-// const updateUserName = async (req, res) => {
-//   const { userId, newName } = req.body;
-//   try {
-//     let user = await UserModel.findById(userId);
-
-//     if (!user) {
-//       return res.status(404).send({ message: "User not found!" });
-//     }
-//     user.name = newName;
-
-//     user = await user.save();
-
-//     res
-//       .status(200)
-//       .send({ message: "User name updated successfully!", data: user });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ message: "Error updating user name", error: error });
-//   }
-// };
-
-// const deleteUserById = async (req, res) => {
-//   const { userId } = req.params;
-
-//   try {
-
-//     const user = await UserModel.findByIdAndDelete(userId);
-
-//     if (!user) {
-//       return res.status(404).send({ message: "User not found!" });
-//     }
-
-//     res.status(200).send({ message: "User deleted successfully", data: user });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ message: "Error deleting user", error: error });
-//   }
-// };
-
-// const login = async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     const user = await UserModel.findOne({
-//       $and: [{ email: email }, { isVerified: true }, { isDelete: false }],
-//     });
-//     if (!user) {
-//       return res.status(404).send({ message: "User not found!" });
-//     }
-//     let token = await UserModel.matchPassword(
-//       req.body.email,
-//       req.body.password
-//     );
-//     res
-//       .status(200)
-//       .send({ message: "login Success !", data: { token: token } });
-//   } catch (error) {
-//     res
-//       .status(400)
-//       .send({ message: "Login Failed !", data: "", Error: "Login Failed" });
-//   }
-// };
-
-
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log("Email:", email);
 
-    // Find user by email and ensure user is verified and not deleted
     const user = await UserModel.findOne({
       $and: [{ email: email }, { isVerified: true }, { isDelete: false }],
     });
-    // console.log(user);
 
     if (!user) {
       return res.status(404).send({ message: "User not found!" });
     }
 
-    // Match the password
     let token = await UserModel.matchPassword(email, password);
 
-    // Ensure the token is created successfully
+
     if (token) {
-      // Respond with token, email, and auth role
       return res.status(200).send({
         message: "Login Success!",
         data: {
           token: token,
-          email: user.email, // Include user email if needed
-          auth: user.auth, // Send the auth (role) field to the frontend
+          email: user.email, 
+          auth: user.auth, 
           _id: user._id,
         },
       });

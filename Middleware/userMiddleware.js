@@ -24,7 +24,6 @@ let upload_storage = multer.diskStorage({
     },
     filename:function(req,file,cb){
         let img = file.originalname.split(".")
-        // console.log(img);
         
         cb(null, file.originalname);
     }
@@ -42,30 +41,5 @@ const verifyext = async (req,res,next) => {
     res.send(error)
  } 
 }
-
-// const multer = require("multer");
-// const path = require("path");
-
-// // Storage config
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/"); // or "public/uploads/" if using static files
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-//   },
-// });
-
-// // Optional: Validate only image files
-// const verifyext = (req, file, cb) => {
-//   if (file.mimetype.startsWith("image/")) {
-//     cb(null, true);
-//   } else {
-//     cb(new Error("Only image files are allowed!"), false);
-//   }
-// };
-
-// const upload1 = multer({ storage, verifyext });
-
 
 module.exports={userTokenVerification,upload1,verifyext};   

@@ -1,103 +1,25 @@
- const Event = require("../Model/AdminEvent");
+const Event = require("../Model/AdminEvent");
 
-// Create Event
-// const createEvent = async (req, res) => {
-//     try {
-//         const {
-//             eventTitle,
-//             date,
-//             startTime,
-//             endTime,
-//             description,
-//             hostedBy,
-//             hostedProfileLink,
-//             location,
-//             category,
-//             tags = [],
-//             ticketPrice = 0,
-//             capacity = 0
-//         } = req.body;
-
-//         // Get uploaded file path
-//         const eventImage = req.file ? req.file.path : null;
-
-//         // Check if required fields are present
-//         if (!eventTitle || !date || !startTime || !endTime || !description || !hostedBy || !location || !category) {
-//             return res.status(400).json({ error: "All required fields must be provided" });
-//         }
-
-//         const event = new Event({
-//             eventTitle,
-//             date,
-//             startTime,
-//             endTime,
-//             description,
-//             hostedBy,
-//             hostedProfileLink,
-//             location,
-//             eventImage,
-//             category,
-//             tags,
-//             ticketPrice,
-//             capacity
-//         });
-
-//         await event.save();
-//         res.status(201).json({ message: "Event created successfully", event });
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+// ✅ Create new event with status "pending"
 const createEvent = async (req, res) => {
+    const event = {
+        eventTitle: req.body.eventTitle,
+        eventDate: req.body.eventDate,
+        eventTime: req.body.eventTime,
+        location: req.body.location,
+        status: "pending",
+        eventPic: req.file ? req.file.filename : ""
+    };
+
     try {
-        const {
-            eventTitle,
-            date,
-            startTime,
-            endTime,
-            description,
-            hostedBy,
-            hostedProfileLink,
-            location,
-            category,
-            tags = [],
-            ticketPrice = 0,
-            capacity = 0
-        } = req.body;
-
-        // ✅ Save the uploaded image path
-        const eventImage = req.file ? `/uploads/${req.file.filename}` : null;
-
-        // Check if required fields are present
-        if (!eventTitle || !date || !startTime || !endTime || !description || !hostedBy || !location || !category) {
-            return res.status(400).json({ error: "All required fields must be provided" });
-        }
-
-        const event = new Event({
-            eventTitle,
-            date,
-            startTime,
-            endTime,
-            description,
-            hostedBy,
-            hostedProfileLink,
-            location,
-            eventImage,  // ✅ Save event image path in database
-            category,
-            tags,
-            ticketPrice,
-            capacity
-        });
-
-        await event.save();
-        res.status(201).json({ message: "Event created successfully", event });
+        const eventData = await new Event(event).save();
+        res.status(201).send({ message: "Event submitted for approval", data: eventData });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).send({ message: "Request failed", data: "", error: error.message });
     }
 };
 
-
-// Get All Events
+// ✅ Get all events (admin view: pending/approved/rejected)
 const getEvents = async (req, res) => {
     try {
         const events = await Event.find();
@@ -107,7 +29,7 @@ const getEvents = async (req, res) => {
     }
 };
 
-// Get Event by ID
+// ✅ Get single event by ID
 const getEventById = async (req, res) => {
     try {
         const event = await Event.findById(req.params.id);
@@ -120,36 +42,18 @@ const getEventById = async (req, res) => {
     }
 };
 
-// Update Event
-// const updateEvent = async (req, res) => {
-//     try {
-//         const updateData = req.body;
-
-//         if (req.file) {
-//             updateData.eventImage = req.file.path;
-//         }
-
-//         const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
-
-//         if (!updatedEvent) {
-//             return res.status(404).json({ error: "Event not found" });
-//         }
-
-//         res.status(200).json({ message: "Event updated successfully", event: updatedEvent });
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+// ✅ Update event (admin only)
 const updateEvent = async (req, res) => {
     try {
         const updateData = req.body;
-
-        // ✅ If a new image is uploaded, update the image path
         if (req.file) {
-            updateData.eventImage = `/uploads/${req.file.filename}`;
+            updateData.eventPic = req.file.filename;
         }
 
-        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
+        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, updateData, {
+            new: true,
+            runValidators: true
+        });
 
         if (!updatedEvent) {
             return res.status(404).json({ error: "Event not found" });
@@ -161,8 +65,7 @@ const updateEvent = async (req, res) => {
     }
 };
 
-
-// Delete Event
+// ✅ Delete event
 const deleteEvent = async (req, res) => {
     try {
         const deletedEvent = await Event.findByIdAndDelete(req.params.id);
@@ -175,13 +78,50 @@ const deleteEvent = async (req, res) => {
     }
 };
 
+const updateEventStatus = async (req, res) => {
+    const eventId = req.params.id;
+    const newStatus = req.body.status;
+    console.log("Event ID sent to API:", eventId);
+
+
+    if (!["approved", "rejected"].includes(newStatus)) {
+        return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    console.log("Received ID:", eventId);
+
+    try {
+        const existing = await Event.findById(eventId);
+        if (!existing) {
+            console.log("Event does not exist in DB.");
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        const updatedEvent = await Event.findOneAndUpdate(
+            { _id: eventId },
+            { status: newStatus },
+            { new: true }
+        );
+
+
+        return res.status(200).json({
+            message: `Event status updated to "${newStatus}"`,
+            data: updatedEvent
+        });
+    } catch (error) {
+        console.error("Error updating status:", error);
+        return res.status(500).json({ message: "Failed to update status", error: error.message });
+    }
+};
+
+
+
+
 module.exports = {
     createEvent,
     getEvents,
     getEventById,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    updateEventStatus
 };
-
-
-//http://localhost:8080/adminEvent/create

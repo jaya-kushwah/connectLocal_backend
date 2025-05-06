@@ -1,33 +1,6 @@
 const multer = require("multer");
 const EventModel = require("../Model/eventSchema");
 
-// const addEvent = async (req, res) => {
-//     const event = {
-//         eventTitle: req.body.eventTitle,
-//         description: req.body.description,
-//         eventStartDate: req.body.eventStartDate,
-//         eventEndDate: req.body.eventEndDate,
-//         location: req.body.location,
-//         slots: req.body.slots,
-//         ticketPrice: req.body.ticketPrice,
-//         eventType: req.body.eventType,
-//         eventImage: req.file ? req.file.filename : ""
-//     };
-
-//     if (event.eventImage === undefined) {
-//         event.eventImage = "";
-//     } else {
-//         event.eventImage =  req.file.filename;
-//     }
-
-//     try {
-//         const eventData = await new EventModel(event).save();
-//         res.status(201).send({ message: "Success!", data: eventData });
-//     } catch (error) {
-//         res.status(400).send({ message: "Request failed", data: "", error: error.message });
-//     }
-// };
-
 const addEvent = async (req, res) => {
     try {
         const event = {
