@@ -70,15 +70,14 @@ const getUser = async (req, res) => {
 
 
 const updateUserName = async (req, res) => {
-  console.log('body=======>', req.params)
   try {
-    const { id } = req.params; // 👈 Get userId from URL
-    const { name, email, location, mobile, profileImage } = req.body;
+    const { id } = req.params;
+    const { name, email, location, mobile} = req.body;
+// console.log(req);
 
     if (!id) {
       return res.status(400).send({ message: "User ID is required in URL." });
     }
-
     const user = await UserModel.findById(id);
     if (!user) {
       return res.status(404).send({ message: "User not found!" });
@@ -88,10 +87,15 @@ const updateUserName = async (req, res) => {
     if (email !== undefined) user.email = email;
     if (location !== undefined) user.location = location;
     if (mobile !== undefined) user.mobile = mobile;
-    if (profileImage !== undefined) user.profileImage = profileImage;
-
+    // if (profileImage !== undefined) user.profileImage = profileImage;  
+    // if (req.file) {
+    //   user.profileImage = req.file.filename;
+    // }
+    if (req.file) {
+      user.profileImage = `http://localhost:8080/user/upload/${req.file.filename}`;
+    }
     const updatedUser = await user.save();
-
+    
     return res.status(200).send({
       message: "User details updated successfully!",
       data: updatedUser,
@@ -127,8 +131,8 @@ const login = async (req, res) => {
         message: "Login Success!",
         data: {
           token: token,
-          email: user.email, 
-          auth: user.auth, 
+          email: user.email,
+          auth: user.auth,
           _id: user._id,
         },
       });
@@ -247,6 +251,8 @@ const getUserById = async (req, res) => {
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
     }
+    console.log(event);
+
     res.status(200).json({ message: "Success!", data: event });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch event", error: error.message });

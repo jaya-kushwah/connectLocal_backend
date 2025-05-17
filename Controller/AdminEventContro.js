@@ -1,4 +1,7 @@
 const Event = require("../Model/AdminEvent");
+const UserModel = require("../Model/userModel");
+const EventCardModel = require("../Model/eventCardModel");
+const mongoose = require('mongoose');
 
 // ✅ Create new event with status "pending"
 const createEvent = async (req, res) => {
@@ -77,32 +80,37 @@ const deleteEvent = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+  
 
 const updateEventStatus = async (req, res) => {
     const eventId = req.params.id;
     const newStatus = req.body.status;
+
     console.log("Event ID sent to API:", eventId);
+    console.log("New Status from form data:", newStatus);
 
-
+    // Check for valid status
     if (!["approved", "rejected"].includes(newStatus)) {
         return res.status(400).json({ message: "Invalid status value" });
     }
 
-    console.log("Received ID:", eventId);
-
     try {
-        const existing = await Event.findById(eventId);
+        // Check for valid Object ID                
+        if (!mongoose.Types.ObjectId.isValid(eventId)) {
+            return res.status(400).json({ message: "Invalid Event ID" });
+        }
+
+        // Find and update the event
+        const existing = await EventCardModel.findById(eventId);
         if (!existing) {
-            console.log("Event does not exist in DB.");
             return res.status(404).json({ message: "Event not found" });
         }
 
-        const updatedEvent = await Event.findOneAndUpdate(
-            { _id: eventId },
+        const updatedEvent = await EventCardModel.findByIdAndUpdate(
+            eventId,
             { status: newStatus },
             { new: true }
         );
-
 
         return res.status(200).json({
             message: `Event status updated to "${newStatus}"`,
@@ -115,13 +123,11 @@ const updateEventStatus = async (req, res) => {
 };
 
 
-
-
 module.exports = {
     createEvent,
     getEvents,
     getEventById,
     updateEvent,
-    deleteEvent,
+    deleteEvent,            
     updateEventStatus
 };

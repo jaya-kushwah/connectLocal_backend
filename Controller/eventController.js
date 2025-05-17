@@ -101,5 +101,71 @@ const filterEvents = async (req, res) => {
 };
 
 
+const deleteEvent = async (req, res) => {
+    try {
+        const deletedEvent = await EventModel.findByIdAndDelete(req.params.id);
+        if (!deletedEvent) {
+            return res.status(404).json({ message: "Event not found" });
+        }
 
-module.exports = { addEvent,getAllEvents,uploadFile,getEventById,filterEvents };
+        // Optionally delete image file
+        if (deletedEvent.eventImage) {
+            const filePath = `./uploads/${deletedEvent.eventImage}`;
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+
+        res.status(200).json({ message: "Event deleted successfully", data: deletedEvent });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete event", error: error.message });
+    }
+};
+
+
+// ✅ UPDATE Event
+const updateEvent = async (req, res) => {
+    const eventId = req.params.id;
+
+    const updateData = {
+        eventTitle: req.body.eventTitle,
+        description: req.body.description,
+        eventStartDate: req.body.eventStartDate,
+        eventEndDate: req.body.eventEndDate,
+        location: req.body.location,
+        slots: req.body.slots,
+        ticketPrice: req.body.ticketPrice,
+        eventType: req.body.eventType,
+    };
+
+    if (req.file) {
+        updateData.eventImage = req.file.filename;
+    }
+
+    try {
+        const updatedEvent = await EventModel.findByIdAndUpdate(eventId, updateData, {
+            new: true,
+            runValidators: true,
+        });
+
+        if (!updatedEvent) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        res.status(200).json({ message: "Event updated successfully", data: updatedEvent });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update event", error: error.message });
+    }
+};
+
+
+module.exports = {
+    addEvent,
+    getAllEvents,
+    uploadFile,
+    getEventById,
+    filterEvents,
+    deleteEvent,
+    updateEvent
+};
+

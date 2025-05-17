@@ -5,7 +5,11 @@ const {
   confirmUserInGroup,
   getAllGroups,
   validateGroupMembers,
-  getMyGroups
+  getGroupsByUserId,
+  approveGroupStatus,
+  getSuggestedEmails ,
+  editGroup,
+  deleteGroup
 } = require('../Controller/groupController');
 
 
@@ -15,7 +19,12 @@ router.route("/").post(addGroup);
 router.put("/confirm-user", confirmUserInGroup);
 router.get("/", getAllGroups);
 router.post('/validate-emails', validateGroupMembers);
-router.get('/mygroups', getMyGroups);
+router.get("/user/:userId", getGroupsByUserId);
+router.patch("/status/:id", approveGroupStatus);
+router.get("/suggest-emails", getSuggestedEmails);
+router.patch("/edit/:id", editGroup);
+router.delete("/delete/:id", deleteGroup);
+
 
 
 

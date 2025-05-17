@@ -1,10 +1,14 @@
 const multer = require("multer");
 const EventCardModel = require("../Model/eventCardModel");
+const Event = require("../Model/AdminEvent")
+const UserModel = require("../Model/userModel");
+const mongoose = require('mongoose');
 
 const addCardEvent = async (req, res) => {
-    const { eventTitle, eventDate, eventTime, location } = req.body;
+    const { userId, eventTitle, eventDate, eventTime, location } = req.body;
 
     const event = {
+        userId,
         eventTitle,
         eventDate,
         eventTime,
@@ -15,7 +19,7 @@ const addCardEvent = async (req, res) => {
 
     try {
         // 🔍 Check manually before save
-        const duplicate = await EventCardModel.findOne({ eventTitle, eventDate, eventTime, location });
+        const duplicate = await EventCardModel.findOne({ userId, eventTitle, eventDate, eventTime, location });
 
         if (duplicate) {
             return res.status(409).send({
@@ -43,6 +47,17 @@ const getAllCardEvents = async (req, res) => {
         res.status(200).json({ message: "Success!", data: events });
     } catch (error) {
         res.status(500).json({ message: "Failed to fetch events", error: error.message });
+    }
+};
+
+const getCardsByUserId = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        const CardData = await EventCardModel.find({ userId }); // Correct field
+        res.status(200).send({ msg: "success", data: CardData });
+    } catch (error) {
+        res.status(500).send({ msg: "request failed", data: null, error: error.message });
     }
 };
 
@@ -93,6 +108,7 @@ const updateCardEvent = async (req, res) => {
         eventDate: req.body.eventDate,
         eventTime: req.body.eventTime,
         location: req.body.location,
+        status: req.body.status,
     };
 
     if (req.file) {
@@ -116,5 +132,34 @@ const updateCardEvent = async (req, res) => {
 };
 
 
+const getApprovedCardsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
-module.exports = { addCardEvent, getAllCardEvents, uploadFil, EventGetById, deleteCardEvent, updateCardEvent };
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).send({ msg: "Invalid user ID" });
+    }
+
+    const approvedEvents = await EventCardModel.find({
+      userId: new mongoose.Types.ObjectId(userId),
+      status: "approved",
+    });
+
+    res.status(200).send({ msg: "Success", data: approvedEvents });
+  } catch (error) {
+    console.error("Error fetching approved events:", error);
+    res.status(500).send({ msg: "Request failed", error: error.message });
+  }
+};
+
+
+
+
+
+
+module.exports = {
+    addCardEvent, getAllCardEvents, uploadFil,
+    EventGetById, deleteCardEvent,
+    updateCardEvent, getCardsByUserId,
+    getApprovedCardsByUserId
+};
